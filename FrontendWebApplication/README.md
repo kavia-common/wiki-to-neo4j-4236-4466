@@ -1,82 +1,77 @@
-# Lightweight React Template for KAVIA
+# Frontend Web Application - Wiki to Neo4j
 
-This project provides a minimal React template with a clean, modern UI and minimal dependencies.
+This React app lets users submit a Wikipedia URL or Topic, tracks the extraction job status, and displays a simple graph visualization or error details. It communicates with the backend via REST API using HTTP Basic Auth.
 
 ## Features
 
-- **Lightweight**: No heavy UI frameworks - uses only vanilla CSS and React
-- **Modern UI**: Clean, responsive design with KAVIA brand styling
-- **Fast**: Minimal dependencies for quick loading times
-- **Simple**: Easy to understand and modify
+- Submit input (`url` or `topic`, at least one required)
+- Start a job and receive `jobId`
+- Poll job status until `completed` or `failed`
+- Fetch and show graph data on completion (basic placeholder list of nodes/edges)
+- Fetch and show error details on failure or on demand
+- Centralized API client with Basic Auth (env-configured)
+- Basic responsive layout and loading states
 
-## Getting Started
+## Prerequisites
 
-In the project directory, you can run:
+- Node.js 16+ and npm
 
-### `npm start`
+## Setup
 
-Runs the app in development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+1. Copy `.env.example` to `.env` and set your values:
+   ```
+   REACT_APP_API_BASE_URL=http://localhost:8000
+   REACT_APP_API_BASIC_USER=your_api_username
+   REACT_APP_API_BASIC_PASS=your_api_password
+   ```
 
-### `npm test`
+2. Install dependencies:
+   ```
+   npm install
+   ```
 
-Launches the test runner in interactive watch mode.
+3. Start the development server:
+   ```
+   npm start
+   ```
 
-### `npm run build`
+Open http://localhost:3000 in your browser.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## API Integration
 
-## Customization
+The app uses the following endpoints (HTTP Basic Auth required):
 
-### Colors
+- POST `/api/input` → `{ jobId }`
+- GET `/api/status/{jobId}` → `{ jobId, status, progress?, message? }`
+- GET `/api/graph/{jobId}` → `{ nodes: [], edges: [] }` (on completed)
+- GET `/api/errors/{jobId}` → `{ error, details? }`
 
-The main brand colors are defined as CSS variables in `src/App.css`:
+Unauthorized (401), Not Found (404), and Server Errors (500) are handled with user-friendly messages.
 
-```css
-:root {
-  --kavia-orange: #E87A41;
-  --kavia-dark: #1A1A1A;
-  --text-color: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.7);
-  --border-color: rgba(255, 255, 255, 0.1);
-}
-```
+## Project Structure
 
-### Components
+- `src/api/client.ts` — Axios client with Basic Auth and typed API calls.
+- `src/components/InputForm.tsx` — Input form with validation.
+- `src/components/StatusPanel.tsx` — Status display and polling controls.
+- `src/components/GraphView.tsx` — Placeholder visualization.
+- `src/pages/Home.tsx` — Main page tying everything together.
+- `src/utils/validators.ts` — Validation helpers.
+- `src/styles.css` — Basic responsive styling.
+- `src/App.tsx`, `src/index.tsx` — App entry and routing.
 
-This template uses pure HTML/CSS components instead of a UI framework. You can find component styles in `src/App.css`. 
+## Notes
 
-Common components include:
-- Buttons (`.btn`, `.btn-large`)
-- Container (`.container`)
-- Navigation (`.navbar`)
-- Typography (`.title`, `.subtitle`, `.description`)
+- This project is based on Create React App; environment variables must be prefixed with `REACT_APP_`.
+- If you change `.env`, restart `npm start` to apply changes.
+- The graph component is a placeholder; integrate a real graph library (e.g., d3/vis/force-graph) in the future.
 
-## Learn More
+## Scripts
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- `npm start` — Run dev server at port 3000
+- `npm run build` — Create production build
+- `npm test` — Run tests (if any)
 
-### Code Splitting
+## Security
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- Credentials are read from `.env` at build time and used only to set the Authorization header.
+- Avoid committing real credentials to version control. Use `.env` for local dev and secure secrets in deployments.
